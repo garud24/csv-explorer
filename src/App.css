@@ -180,3 +180,107 @@ td.num { text-align: right; font-variant-numeric: tabular-nums; }
   .stat-cards-row { grid-template-columns: repeat(2, 1fr); }
   .charts-row { grid-template-columns: 1fr; }
 }
+
+/* ── Question box ── */
+.question-section {
+  margin: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.question-box {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.question-box input {
+  flex: 1;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid #d4d2ca;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+.question-box input:focus {
+  outline: none;
+  border-color: #0D7377;
+}
+
+.question-box button {
+  padding: 0.6rem 1.4rem;
+  border: none;
+  border-radius: 8px;
+  background: #0D7377;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.question-box button:hover { background: #0a5c5f; }
+
+.question-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.question-buttons button {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid #d4d2ca;
+  border-radius: 99px;
+  background: #fff;
+  font-size: 0.8rem;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.question-buttons button:hover {
+  border-color: #0D7377;
+  color: #0D7377;
+}
+
+/* ── Answer card ── */
+.answer-card {
+  background: #E8F4F4;
+  border: 1px solid #0D7377;
+  border-radius: 10px;
+  padding: 1.1rem 1.3rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.answer-question {
+  font-size: 0.8rem;
+  color: #0a5c5f;
+  font-style: italic;
+  margin-bottom: 0.4rem;
+}
+
+.answer-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1c1c1a;
+  margin-bottom: 0.3rem;
+}
+
+.answer-text {
+  font-size: 0.95rem;
+  color: #1c1c1a;
+  margin-bottom: 0.5rem;
+}
+
+.answer-explanation {
+  font-size: 0.8rem;
+  color: #6b6b68;
+}
+
+.answer-explanation summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #0D7377;
+}
+
+.answer-explanation p { margin-top: 0.4rem; }

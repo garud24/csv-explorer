@@ -10,7 +10,13 @@ import {
   getPopulationBuckets,
   getTopStatesByVeterans,
   formatNumber,
+  getMostPopulousCity,
+  getLeastPopulousCity,
+  getLeastStates,
 } from "./services/insightEngine";
+import { detectIntent } from "./services/questionEngine";
+import QuestionBox from "./components/QuestionBox";
+import AnswerCard, { type DynamicAnswer } from "./components/AnswerCard";
 
 import StatCard from "./components/StatCard";
 import MiniBarList from "./components/MiniBarList";
@@ -34,6 +40,10 @@ export default function APP() {
   const [sortKey, setSortKey] = useState<SortKey>("population");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [search, setSearch] = useState("");
+  // null = no question has been asked yet, or the answer area is empty
+  const [dynamicAnswer, setDynamicAnswer] = useState<DynamicAnswer | null>(
+    null,
+  );
 
   useEffect(() => {
     async function fetchData() {
@@ -130,6 +140,136 @@ export default function APP() {
     { key: "foreignBorn", label: "Foreign born" },
   ];
 
+  // Called whenever the user submits a question (typed or clicked sample button).
+  function handleQuestion(question: string) {
+    const intent = detectIntent(question);
+
+    if (intent === "total_population") {
+      setDynamicAnswer({
+        question,
+        title: "What is the total population?",
+        answer: `The combined population across all cities in this dataset is ${formatNumber(
+          getTotalPopulation(rows),
+        )}.`,
+        explanation:
+          "I added up the population field from every row in the dataset.",
+      });
+      return;
+    }
+
+    if (intent === "avg_median_age") {
+      setDynamicAnswer({
+        question,
+        title: "What is the average median age?",
+        answer: `The average median age across all cities is ${getAvgMedianAge(
+          rows,
+        ).toFixed(1)} years.`,
+        explanation:
+          "I added the median age of every city and divided by the number of cities.",
+      });
+      return;
+    }
+
+    if (intent === "city_count") {
+      setDynamicAnswer({
+        question,
+        title: "How many cities are in the dataset?",
+        answer: `There are ${rows.length.toLocaleString()} cities in this dataset.`,
+        explanation:
+          "I counted the number of rows after removing invalid entries.",
+      });
+      return;
+    }
+
+    if (intent === "top_population_state") {
+      const top = getTopStates(rows, 1)[0];
+      setDynamicAnswer({
+        question,
+        title: "Which state has the highest population?",
+        answer: `${top?.name} has the highest total population: ${formatNumber(
+          top?.value || 0,
+        )}.`,
+        explanation:
+          "I grouped all cities by state, summed each state's city populations, and picked the highest total.",
+      });
+      return;
+    }
+
+    if (intent === "least_population_state") {
+      const bottom = getLeastStates(rows, 1)[0];
+      setDynamicAnswer({
+        question,
+        title: "Which state has the lowest population?",
+        answer: `${
+          bottom?.name
+        } has the lowest total population among the states in this dataset: ${formatNumber(
+          bottom?.value || 0,
+        )}.`,
+        explanation:
+          "I grouped all cities by state, summed each state's city populations, removed zero totals, and picked the lowest.",
+      });
+      return;
+    }
+
+    if (intent === "top_veteran_state") {
+      const top = getTopStatesByVeterans(rows, 1)[0];
+      setDynamicAnswer({
+        question,
+        title: "Which state has the most veterans?",
+        answer: `${
+          top?.name
+        } has the highest total veteran population: ${formatNumber(
+          top?.value || 0,
+        )}.`,
+        explanation:
+          "I grouped all cities by state, summed each state's veteran population, and picked the highest total.",
+      });
+      return;
+    }
+
+    if (intent === "biggest_city") {
+      const city = getMostPopulousCity(rows);
+      setDynamicAnswer({
+        question,
+        title: "Which city has the highest population?",
+        answer: `${city?.city}, ${
+          city?.state
+        } is the most populous city with ${formatNumber(
+          city?.population || 0,
+        )} people.`,
+        explanation:
+          "I sorted every city by population, descending, and took the first row.",
+      });
+      return;
+    }
+
+    if (intent === "smallest_city") {
+      const city = getLeastPopulousCity(rows);
+      setDynamicAnswer({
+        question,
+        title: "Which city has the lowest population?",
+        answer: `${city?.city}, ${
+          city?.state
+        } has the lowest population in this dataset, with ${formatNumber(
+          city?.population || 0,
+        )} people.`,
+        explanation:
+          "I sorted every city by population, ascending, and took the first row.",
+      });
+      return;
+    }
+
+    // intent === "unknown"
+    setDynamicAnswer({
+      question,
+      title: "I'm not sure how to answer that yet",
+      answer:
+        "Try asking about state population, city population, veterans, median age, or the number of cities in the dataset.",
+      explanation:
+        "Your question didn't match any of the patterns this app currently understands.",
+    });
+  }
+
   return (
     <main>
       <header className="app-header">
@@ -140,6 +280,9 @@ export default function APP() {
           {avgMedianAge.toFixed(1)}
         </p>
       </header>
+
+      <QuestionBox onAsk={handleQuestion} />
+      <AnswerCard answer={dynamicAnswer} />
 
       {/* STAT CARDS ROW */}
       {rows.length > 0 && (

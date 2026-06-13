@@ -84,4 +84,30 @@ export function getMostVeteranState(rows: CityRow[]): ChartItem {
   return byState[0] || { name: "N/A", value: 0 };
 }
 
+// This is part of Project 3
+// The questionEngine needs them to answer "least populated state" and "biggest city" type
+
+
+/* Returns state sorted by population ascending (smallest first), 
+ignoring any zeros totals. Mirrors getLeastVendors() in budgetDetective */
+export function getLeastStates(rows: CityRow[], limit = 5): ChartItem[]{
+    return aggregateBy(rows, "state", "population")
+        .filter((item) => item.value > 0)
+        .sort((a,b) => a.value - b.value)
+        .slice(0, limit);
+}
+
+/*returns the single city with the highest population.
+Useful for "Which city is the biggest?" style questions*/
+export function getMostPopulousCity(rows: CityRow[]): CityRow | undefined{
+    return [...rows].sort((a,b) => b.population - a.population)[0];
+}
+
+/* returns the single city with the lowest population */
+export function getLeastPopulousCity(rows: CityRow[]): CityRow | undefined {
+    return [...rows].sort((a,b) => a.population - b.population)[0]
+}
+
+
+
 

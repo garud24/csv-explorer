@@ -12,6 +12,12 @@ Add four chart types over the same dataset: a bar chart for top-N categories, a 
 
 *Skills unlocked → insightEngine.ts · MiniBarList · MiniDonut · SparklineCard · TrendCard*
 
+## Project 3 — Rule-based Q&A engine
+
+Add a text input that accepts natural-language questions. Write a keyword-matching fallback router in TypeScript: detect whether the user asked for "top", "least", "total", "agency", "vendor", etc. Map each combo to a pre-computed answer pulled from your insight functions. Covers: string matching, intent enum, conditional rendering, answer panel component.
+
+*Skills unlocked → fallbackIntent() · handleQuestion() · QuestionBox · answer panel UI*
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
