@@ -1,7 +1,21 @@
-import { useState, useEffect, useMemo } from 'react'
-import './App.css'
-import { loadCities } from './services/csvLoader'
-import type { CityRow } from './types/city'
+import { useState, useEffect, useMemo } from "react";
+import "./App.css";
+import { loadCities } from "./services/csvLoader";
+import type { CityRow } from "./types/city";
+import {
+  getTopStates,
+  getTotalPopulation,
+  getAvgMedianAge,
+  getMostVeteranState,
+  getPopulationBuckets,
+  getTopStatesByVeterans,
+  formatNumber,
+} from "./services/insightEngine";
+
+import StatCard from "./components/StatCard";
+import MiniBarList from "./components/MiniBarList";
+import MiniDonut from "./components/MiniDonut";
+import TrendCard from "./components/TrendCard";
 
 // these are the hooks of react:
 // useState: stores a piece of data and re-renders the component when it changes
@@ -13,81 +27,99 @@ type SortDir = "asc" | "desc";
 
 // keyof CityRow --> typescript utility type produces a nuion of all the key of CityRows
 
-export default function APP(){
+export default function APP() {
   const [rows, setRows] = useState<CityRow[]>([]); // you are calling useState with a generic type parameter CityRow[] and initial value of [](empty array). It returns 2 things the current value (rows) and a function to update it setRows(newValue), React re-renders components with new value
   const [loading, setLoading] = useState(true); // why loading is set to true --> the moment component mounts, it hasn't loaded data yet. Starting as true means your loading screen shows immedaitely, before first renders even completes
   const [error, setError] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("population");
-  const [sortDir, setSortDir] = useState<SortDir>("desc")
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [search, setSearch] = useState("");
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const cities = await loadCities();
+        setRows(cities);
+      } catch (e) {
+        setError("Could not load the dataset. Check your network connection.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, []); // [] means run this once when the component first appears on screen, if you put [search] then it would re-runs search changes
+  // fetchData defined inside useEffect inside of outside? because async functions can't pass directly inside useEffect(expects a normal function)
+  // the pattern is define async function inside useEffect and call it immediately
+  // remember we have passes resolve/ reject created a promise function inside loadCitites() in csvLoader.ts
 
-useEffect(()=>{
-  async function fetchData(){
-    try{
-      const cities = await loadCities();
-      setRows(cities);
-    } catch(e){
-      setError("Could not load the dataset. Check your network connection.")
-    } finally{
-      setLoading(false);
+  const displayRows = useMemo(() => {
+    const filtered = rows.filter(
+      (r) =>
+        r.city.toLowerCase().includes(search.toLowerCase()) ||
+        r.state.toLowerCase().includes(search.toLowerCase()),
+    );
+
+    return [...filtered].sort((a, b) => {
+      const av = a[sortKey];
+      const bv = b[sortKey];
+
+      if (typeof av === "number" && typeof bv === "number") {
+        return sortDir === "asc" ? av - bv : bv - av;
+      }
+      return sortDir === "asc"
+        ? String(av).localeCompare(String(bv))
+        : String(bv).localeCompare(String(av));
+    });
+  }, [rows, sortKey, sortDir, search]);
+
+  // why use useMemo and not directly displayRows, because displayrows would trigger and recalculates every single render
+  // useMemo caches the reuslt and noly recomputes when rowws, sortKeys, sortDir or search changes
+
+  function handleSort(key: SortKey) {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc")); // This is a form of a state setter, instead of passing a new value directly, you pass a function that receives the current value of (d) and returns the next value
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
     }
   }
-  fetchData();
-},[]); // [] means run this once when the component first appears on screen, if you put [search] then it would re-runs search changes
-// fetchData defined inside useEffect inside of outside? because async functions can't pass directly inside useEffect(expects a normal function)
-// the pattern is define async function inside useEffect and call it immediately 
-// remember we have passes resolve/ reject created a promise function inside loadCitites() in csvLoader.ts
 
-const displayRows = useMemo(()=>{
-  const filtered = rows.filter(
-    (r)=>
-      r.city.toLowerCase().includes(search.toLowerCase()) ||
-      r.state.toLowerCase().includes(search.toLowerCase())
+  // const totalPop = useMemo(
+  //   () => rows.reduce((sum, r) => sum + r.population, 0),
+  //   [rows],
+  // );
+  const avgMedianAge = useMemo(
+    () =>
+      rows.length ? rows.reduce((s, r) => s + r.medianAge, 0) / rows.length : 0,
+    [rows],
   );
 
-  return [...filtered].sort((a,b) => {
-    const av = a[sortKey];
-    const bv = b[sortKey];
+  const totalPop = useMemo(() => getTotalPopulation(rows), [rows]);
+  const avgAge = useMemo(() => getAvgMedianAge(rows), [rows]);
+  const topVeteranState = useMemo(() => getMostVeteranState(rows), [rows]);
+  const topStates = useMemo(() => getTopStates(rows, 6), [rows]);
+  const veteransByState = useMemo(
+    () => getTopStatesByVeterans(rows, 5),
+    [rows],
+  );
+  const popBuckets = useMemo(() => getPopulationBuckets(rows), [rows]);
 
-    if (typeof av === "number" && typeof bv === "number"){
-      return sortDir === "asc" ? av - bv : bv - av;
-    }
-    return sortDir === "asc"
-      ? String(av).localeCompare(String(bv))
-      : String(bv).localeCompare(String(av));
-  });
-},[rows, sortKey, sortDir, search]);
-
-// why use useMemo and not directly displayRows, because displayrows would trigger and recalculates every single render
-// useMemo caches the reuslt and noly recomputes when rowws, sortKeys, sortDir or search changes
-
-function handleSort(key: SortKey){
-  if (key === sortKey){
-    setSortDir((d) => (d === "asc" ? "desc" : "asc")); // This is a form of a state setter, instead of passing a new value directly, you pass a function that receives the current value of (d) and returns the next value
-  } else {
-    setSortKey(key);
-    setSortDir("desc");
+  if (loading) {
+    return (
+      <main className="center">
+        <p>Loading dataset...</p>
+      </main>
+    );
   }
-}
+  if (error) {
+    return (
+      <main className="center">
+        <p className="error">{error}</p>
+      </main>
+    );
+  }
 
-const totalPop = useMemo(
-  () => rows.reduce((sum, r) => sum + r.population, 0),
-  [rows]
-);
-const avgMedianAge = useMemo(
-  ()=> (rows.length ? rows.reduce((s,r) => s + r.medianAge, 0) / rows.length : 0),
-  [rows]
-);
-
-if (loading){
-  return <main className ="center"><p>Loading dataset...</p></main>;
-}
-if (error){
-  return <main className='center'><p className='error'>{error}</p></main>;
-}
-
-const columns: { key: SortKey; label: string }[] = [
+  const columns: { key: SortKey; label: string }[] = [
     { key: "city", label: "City" },
     { key: "state", label: "State" },
     { key: "population", label: "Population" },
@@ -108,6 +140,65 @@ const columns: { key: SortKey; label: string }[] = [
           {avgMedianAge.toFixed(1)}
         </p>
       </header>
+
+      {/* STAT CARDS ROW */}
+      {rows.length > 0 && (
+        <section className="dashboard">
+          <div className="stat-cards-row">
+            <StatCard
+              icon="🏙️"
+              title="Total cities"
+              value={rows.length.toLocaleString()}
+              subtitle="in dataset"
+            />
+            <StatCard
+              icon="👥"
+              title="Total population"
+              value={formatNumber(totalPop)}
+              subtitle="across all cities"
+            />
+            <StatCard
+              icon="📅"
+              title="Avg median age"
+              value={avgAge.toFixed(1)}
+              subtitle="years"
+            />
+            <StatCard
+              icon="🎖️"
+              title="Most veterans"
+              value={topVeteranState.name}
+              subtitle={`${formatNumber(topVeteranState.value)} total`}
+            />
+          </div>
+
+          {/* CHARTS ROW */}
+          <div className="charts-row">
+            {/* Chart 1: horizontal bar list — top states by population */}
+            <div className="chart-card">
+              <h3 className="chart-title">Top States by Population</h3>
+              <MiniBarList data={topStates} />
+            </div>
+
+            {/* Chart 2: donut — city size distribution */}
+            <div className="chart-card">
+              <h3 className="chart-title">Cities by Size</h3>
+              <MiniDonut data={popBuckets} />
+            </div>
+
+            {/* Chart 3: area trend — top states by veterans */}
+            <div className="chart-card">
+              <h3 className="chart-title">Top States by Veterans</h3>
+              <TrendCard
+                title=""
+                value=""
+                subtitle=""
+                data={veteransByState}
+                color="#0D7377"
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       <div className="controls">
         <input

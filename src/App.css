@@ -69,3 +69,114 @@ tr:hover td { background: #f9f8f7; }
 td.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 .error { color: #c0392b; }
+
+/* ── Dashboard wrapper ── */
+.dashboard { margin-bottom: 2rem; }
+
+/* ── Stat cards ── */
+.stat-cards-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #ebebea;
+  padding: 1.1rem 1.2rem;
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.stat-card-icon { font-size: 1.5rem; line-height: 1; padding-top: 2px; }
+.stat-card-body { display: flex; flex-direction: column; gap: 2px; }
+.stat-card-title { font-size: 0.78rem; color: #6b6b68; text-transform: uppercase; letter-spacing: 0.04em; }
+.stat-card-value { font-size: 1.5rem; font-weight: 700; color: #1c1c1a; line-height: 1.1; }
+.stat-card-subtitle { font-size: 0.8rem; color: #9b9b97; }
+
+/* ── Chart cards ── */
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.chart-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #ebebea;
+  padding: 1.2rem;
+}
+
+.chart-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1c1c1a;
+  margin-bottom: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── MiniBarList ── */
+.mini-bar-list { display: flex; flex-direction: column; gap: 0.55rem; }
+
+.mini-bar-row { display: flex; flex-direction: column; gap: 3px; }
+
+.mini-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.mini-bar-label strong { color: #1c1c1a; font-weight: 600; }
+
+.mini-bar-track {
+  height: 6px;
+  background: #f1f1ef;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+/* ── MiniDonut ── */
+.mini-donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+
+.mini-donut-legend { width: 100%; display: flex; flex-direction: column; gap: 0.35rem; }
+
+.mini-donut-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #4b5563;
+}
+
+.mini-donut-swatch {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.mini-donut-legend-item strong { margin-left: auto; color: #1c1c1a; }
+
+/* ── TrendCard ── */
+.trend-card { display: flex; flex-direction: column; gap: 0.5rem; }
+.trend-card-header { display: flex; flex-direction: column; gap: 2px; }
+.trend-card-title { font-size: 0.78rem; color: #6b6b68; }
+.trend-card-value { font-size: 1.3rem; font-weight: 700; color: #1c1c1a; }
+.trend-card-subtitle { font-size: 0.8rem; color: #9b9b97; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .stat-cards-row { grid-template-columns: repeat(2, 1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+}

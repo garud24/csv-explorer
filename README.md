@@ -6,6 +6,12 @@ Build a React + Vite + TypeScript app. Fetch a public CSV (e.g. US city demograp
 
 *Skills unlocked → csvLoader.ts · payment.ts (types) · React data flow*
 
+## Project 2 — Visualisations with Recharts
+
+Add four chart types over the same dataset: a bar chart for top-N categories, a donut/pie for spending mix, a sparkline trend over time, and a mini bar list component. Use useMemo to derive aggregated data (group-by + sum). Build reusable card components with props. Covers: useMemo, recharts, component decomposition, aggregateBy pattern.
+
+*Skills unlocked → insightEngine.ts · MiniBarList · MiniDonut · SparklineCard · TrendCard*
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
